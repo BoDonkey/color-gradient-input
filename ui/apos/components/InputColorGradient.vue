@@ -5,7 +5,7 @@
         <div class="apos-input-wrapper">
           <div id="color-square" :style="{ background: gradient }" />
           <AposSchema :schema="gradientSchema" :trigger-validation="triggerValidation" :utility-rail="false"
-            :generation="generation" v-model="gradientSchemaInput" :doc-id="docId" ref="angleSchema">
+            :generation="generation" v-model="gradientSchemaInput" :doc-id="docId" ref="gradientSchema">
           </AposSchema>
         </div>
       </div>
@@ -18,10 +18,6 @@
 import AposInputMixin from 'apostrophe/modules/@apostrophecms/schema/ui/apos/mixins/AposInputMixin';
 import AposInputWrapper from 'apostrophe/modules/@apostrophecms/schema/ui/apos/components/AposInputWrapper.vue';
 import AposSchema from 'apostrophe/modules/@apostrophecms/schema/ui/apos/components/AposSchema.vue';
-
-
-const defStartColor = '#4a90e2ff';
-const defEndColor = '#e24a4fff';
 
 export default {
   name: 'InputColorGradient',
@@ -48,10 +44,11 @@ export default {
   },
   data() {
     const next = this.getNext();
-    console.log('data', next);
     return {
       next,
-      gradientSchemaInput: next,
+      gradientSchemaInput: {
+        data: next
+      },
       gradientSchema: [
         {
           name: 'angle',
@@ -59,7 +56,8 @@ export default {
           type: 'range',
           min: 0,
           max: 360,
-          unit: 'deg'
+          unit: 'deg',
+          def: 90
         },
         {
           name: 'colors',
@@ -71,14 +69,16 @@ export default {
             add: {
               color: {
                 label: 'Add Color',
-                type: 'color'
+                type: 'color',
+                def: '#4a11ffff'
               },
               stop: {
                 label: 'Stop',
                 type: 'range',
                 min: 0,
                 max: 100,
-                unit: '%'
+                unit: '%',
+                def: 0
               }
             }
           }
@@ -88,27 +88,31 @@ export default {
   },
   computed: {
     gradient() {
-      console.log('gradient', this.next, typeof this.next.colors);
-      const gradientString = this.next.colors.reduce((acc, curr, i, colors) => {
-        acc += `${curr.color} ${curr.stop}%`;
-        if (i !== colors.length - 1) {
-          acc += ', ';
-        }
-        return acc;
-      }, `linear-gradient(${this.next.angle}, )`);
-      return gradientString;
+      if (this.next.colors) {
+        const gradientString = this.next.colors.reduce((acc, curr, i, colors) => {
+          acc += `${curr.color} ${curr.stop}%`;
+          if (i !== colors.length - 1) {
+            acc += ', ';
+          }
+          return acc;
+        }, `linear-gradient(${this.next.angle}, )`);
+        return gradientString;
+      }
     }
   },
   watch: {
     generation() {
       this.next = this.getNext();
+      this.gradientSchemaInput = {
+        data: this.next.value
+      };
     },
     gradientSchemaInput: {
       deep: true,
       handler() {
         if (!this.gradientSchemaInput.hasErrors) {
           this.next = {
-            data: this.angleSchemaInput.data
+            data: this.gradientSchemaInput.data
           };
         }
       }
@@ -125,19 +129,7 @@ export default {
       return false;
     },
     getNext() {
-      return this.value.data ? this.value.data : (this.field.def || {
-        angle: 90,
-        colors: [
-          {
-            color: defStartColor,
-            stop: 0
-          },
-          {
-            color: defEndColor,
-            stop: 100
-          }
-        ]
-      });
+      return this.value.data ? this.value.data : (this.field.def || {});
     }
   }
 };
