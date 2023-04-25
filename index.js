@@ -2,6 +2,7 @@ const tinycolor = require('tinycolor2');
 
 module.exports = {
   init(self) {
+    console.log('init')
     self.addColorGradientFieldType();
   },
   methods(self) {

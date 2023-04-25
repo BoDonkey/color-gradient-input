@@ -1,0 +1,27 @@
+{
+  "name": "color-gradient-input",
+  "version": "1.0.0",
+  "description": "An ApostropheCMS 3 module to create a custom color gradient schema field.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BoDonkey/color-gradient-input.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BoDonkey/color-gradient-input/issues"
+  },
+  "homepage": "https://github.com/BoDonkey/color-gradient-input#readme",
+  "dependencies": {
+    "tinycolor2": "^1.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-apostrophe": "^3.4.2",
+    "mocha": "^10.2.0"
+  }
+}
