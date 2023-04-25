@@ -1,12 +1,11 @@
 <template>
-  <AposInputWrapper :field="field" :error="null" :uid="uid" :display-options="displayOptions" :modifiers="modifiers"
-    :value="value" :items="next.colors">
+  <AposInputWrapper :field="field" :error="null" :uid="uid" :display-options="displayOptions" :modifiers="modifiers">
     <template #body>
       <div class="apos-input-object">
         <div class="apos-input-wrapper">
           <div id="color-square" :style="{ background: gradient }" />
           <AposSchema :schema="gradientSchema" :trigger-validation="triggerValidation" :utility-rail="false"
-            :generation="generation" v-model="gradientSchemaInput" ref="angleSchema">
+            :generation="generation" v-model="gradientSchemaInput" :doc-id="docId" ref="angleSchema">
           </AposSchema>
         </div>
       </div>
