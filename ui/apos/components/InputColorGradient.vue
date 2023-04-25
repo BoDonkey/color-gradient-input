@@ -5,15 +5,9 @@
       <div class="apos-input-object">
         <div class="apos-input-wrapper">
           <div id="color-square" :style="{ background: gradient }" />
-          <AposSchema :schema="angleSchema" :trigger-validation="triggerValidation" :utility-rail="false"
-            :generation="generation" v-model="angleSchemaInput" ref="angleSchema">
+          <AposSchema :schema="gradientSchema" :trigger-validation="triggerValidation" :utility-rail="false"
+            :generation="generation" v-model="gradientSchemaInput" ref="angleSchema">
           </AposSchema>
-          <div>
-            <h3>Colors</h3>
-            <AposSchema :schema="colorSchema" v-model="colorSchemaInput" :trigger-validation="triggerValidation"
-              :utility-rail="false" :generation="generation" :items="next.colors" ref="colorSchema">
-            </AposSchema>
-          </div>
         </div>
       </div>
     </template>
@@ -58,11 +52,8 @@ export default {
     console.log('data', next);
     return {
       next,
-      angleSchemaInput: this.expandAngle(next.angle),
-      colorSchemaInput: this.expandColors(next.colors),
-      // These schemas are really constants, but this is a convenient
-      // way to make them component properties
-      angleSchema: [
+      gradientSchemaInput: next,
+      gradientSchema: [
         {
           name: 'angle',
           label: 'Angle',
@@ -70,9 +61,7 @@ export default {
           min: 0,
           max: 360,
           unit: 'deg'
-        }
-      ],
-      colorSchema: [
+        },
         {
           name: 'colors',
           label: 'Colors',
@@ -114,27 +103,13 @@ export default {
   watch: {
     generation() {
       this.next = this.getNext();
-      this.angleSchemaInput = expandAngle(this.next.angle);
-      this.colorSchemaInput = expandColors(this.next.colors);
     },
-    angleSchemaInput: {
+    gradientSchemaInput: {
       deep: true,
       handler() {
-        if (!this.angleSchemaInput.hasErrors) {
+        if (!this.gradientSchemaInput.hasErrors) {
           this.next = {
-            ...this.next,
-            angle: this.angleSchemaInput.data.angle
-          };
-        }
-      }
-    },
-    colorSchemaInput: {
-      deep: true,
-      handler() {
-        if (this.colorSchemaInput.hasErrors) {
-          this.next = {
-            ...this.next,
-            colors: this.colorSchemaInput.data.colors
+            data: this.angleSchemaInput.data
           };
         }
       }
@@ -145,7 +120,7 @@ export default {
       if (value == null) {
         value = '';
       }
-      if (this.nameSchemaInput.hasErrors || this.valueSchemaInput.hasErrors) {
+      if (this.gradientSchemaInput.hasErrors) {
         return 'invalid';
       }
       return false;
@@ -164,20 +139,6 @@ export default {
           }
         ]
       });
-    },
-    expandAngle(angle) {
-      return {
-        data: {
-          angle
-        }
-      };
-    },
-    expandColors(colors) {
-      return {
-        data: {
-          colors
-        }
-      };
     }
   }
 };
