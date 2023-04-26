@@ -1,5 +1,3 @@
-const tinycolor = require('tinycolor2');
-
 module.exports = {
   init(self) {
     console.log('init')
@@ -15,32 +13,67 @@ module.exports = {
         });
       },
       async convertInput(req, field, data, object) {
-        const input = data[field.name];
-        if (data[field.name] == null || data[field.name] === '') {
-          if (field.required) {
-            throw self.apos.error('Required field not present');
+        data = data[field.name];
+        const schema = [
+          {
+            name: 'angle',
+            label: 'Angle',
+            type: 'range',
+            min: 0,
+            max: 360,
+            unit: 'deg',
+            def: 90
+          },
+          {
+            name: 'colors',
+            label: 'Colors',
+            type: 'array',
+            min: 2,
+            inline: true,
+            fields: {
+              add: {
+                color: {
+                  label: 'Add Color',
+                  type: 'color',
+                  def: '#4a11ffff'
+                },
+                stop: {
+                  label: 'Stop',
+                  type: 'range',
+                  min: 0,
+                  max: 100,
+                  unit: '%',
+                  def: 0
+                }
+              }
+            }
           }
-        }
-        const sanitizedColors = [];
-        for (const colorSet of input.colors) {
-          let color = self.apos.launder.string(colorSet.color);
-          const test = tinycolor(color);
-          if (!tinycolor(test).isValid()) {
-            color = null;
-          }
-          const stop = self.apos.launder.integer(colorSet.stop);
-
-          sanitizedColors.push({
-            color,
-            stop
-          });
-        }
-
-        const launderedData = {
-          angle: self.apos.launder.integer(input.angle),
-          colors: sanitizedColors
+        ];
+        const errors = [];
+        const result = {
+          _id:
+            self.apos.launder.id(data && data._id) ||
+            self.apos.util.generateId()
         };
-        object[field.name] = launderedData;
+        if (data == null || typeof data !== 'object' || Array.isArray(data)) {
+          data = {};
+        }
+        try {
+          await self.apos.schema.convert(req, schema, data, result);
+        } catch (e) {
+          for (const error of e) {
+            errors.push({
+              path: error.path,
+              error: error.error
+            });
+          }
+        }
+        result.metaType = 'gradientItem';
+        result.scopedObjectName = field.scopedObjectName;
+        object[field.name] = result;
+        if (errors.length) {
+          throw errors;
+        }
       }
     };
   }
