@@ -90,12 +90,14 @@ export default {
     gradient() {
       if (this.next.colors) {
         const gradientString = this.next.colors.reduce((acc, curr, i, colors) => {
-          acc += `${curr.color} ${curr.stop}%`;
+          acc += `${curr.color} ${curr.stop}`;
           if (i !== colors.length - 1) {
             acc += ', ';
-          }
+          } else {
+            acc += ')';
+          };
           return acc;
-        }, `linear-gradient(${this.next.angle}, )`);
+        }, `linear-gradient(${this.next.angle}, `);
         return gradientString;
       }
     }
