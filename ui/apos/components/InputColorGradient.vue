@@ -1,12 +1,20 @@
 <template>
-  <AposInputWrapper :field="field" :error="null" :uid="uid" :display-options="displayOptions" :modifiers="modifiers">
+  <AposInputWrapper
+  :field="field"
+  :error="null"
+  :uid="uid"
+  >
     <template #body>
       <div class="apos-input-object">
         <div class="apos-input-wrapper">
           <div id="color-square" :style="{ background: gradient }" />
-          <AposSchema :schema="gradientSchema" :trigger-validation="triggerValidation" :utility-rail="false"
-            :generation="generation" v-model="gradientSchemaInput" :doc-id="docId" ref="gradientSchema">
-          </AposSchema>
+          <AposSchema
+          :schema="gradientSchema"
+          :trigger-validation="triggerValidation"
+          :utility-rail="false"
+          :generation="generation"
+          v-model="gradientSchemaInput"
+          />
         </div>
       </div>
     </template>
@@ -14,7 +22,6 @@
 </template>
 
 <script>
-
 import AposInputMixin from 'apostrophe/modules/@apostrophecms/schema/ui/apos/mixins/AposInputMixin';
 import AposInputWrapper from 'apostrophe/modules/@apostrophecms/schema/ui/apos/components/AposInputWrapper.vue';
 import AposSchema from 'apostrophe/modules/@apostrophecms/schema/ui/apos/components/AposSchema.vue';
@@ -44,60 +51,27 @@ export default {
   },
   data() {
     const next = this.getNext();
+    const gradientSchema = apos.modules['color-gradient'].schema;
     return {
       next,
       gradientSchemaInput: {
         data: next
       },
-      gradientSchema: [
-        {
-          name: 'angle',
-          label: 'Angle',
-          type: 'range',
-          min: 0,
-          max: 360,
-          unit: 'deg',
-          def: 90
-        },
-        {
-          name: 'colors',
-          label: 'Colors',
-          type: 'array',
-          min: 2,
-          inline: true,
-          fields: {
-            add: {
-              color: {
-                label: 'Add Color',
-                type: 'color',
-                def: '#4a11ffff'
-              },
-              stop: {
-                label: 'Stop',
-                type: 'range',
-                min: 0,
-                max: 100,
-                unit: '%',
-                def: 0
-              }
-            }
-          }
-        }
-      ]
-    };
+      gradientSchema: gradientSchema
+    }
   },
   computed: {
     gradient() {
-      if (this.next.colors) {
+      if (this.next.colors && this.next.angle) {
         const gradientString = this.next.colors.reduce((acc, curr, i, colors) => {
-          acc += `${curr.color} ${curr.stop}`;
+          acc += `${curr.color} ${curr.stop}%`;
           if (i !== colors.length - 1) {
             acc += ', ';
           } else {
             acc += ')';
-          };
+          }
           return acc;
-        }, `linear-gradient(${this.next.angle}, `);
+        }, `linear-gradient(${this.next.angle}deg, `);
         return gradientString;
       }
     }
@@ -113,9 +87,7 @@ export default {
       deep: true,
       handler() {
         if (!this.gradientSchemaInput.hasErrors) {
-          this.next = {
-            data: this.gradientSchemaInput.data
-          };
+          this.next = this.gradientSchemaInput.data;
         }
       }
     }
@@ -131,7 +103,19 @@ export default {
       return false;
     },
     getNext() {
-      return this.value.data ? this.value.data : (this.field.def || {});
+      return this.value.data ? this.value.data : (this.field.def || {
+        angle: 90,
+        colors: [
+          {
+            color: '#d0021bff',
+            stop: 0
+          },
+          {
+            color: '#4a11ffff',
+            stop: 100
+          }
+        ]
+      });
     }
   }
 };

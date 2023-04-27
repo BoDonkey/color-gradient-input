@@ -1,10 +1,53 @@
 module.exports = {
   init(self) {
-    console.log('init')
+    self.enableBrowserData();
     self.addColorGradientFieldType();
   },
   methods(self) {
     return {
+      exposeSchema() {
+        const schema = [
+          {
+            name: 'angle',
+            label: 'Angle',
+            type: 'range',
+            min: 0,
+            max: 360,
+            unit: 'deg',
+            def: 0
+          },
+          {
+            name: 'colors',
+            label: 'Colors',
+            type: 'array',
+            draggable: true,
+            inline: true,
+            schema: [
+              {
+                name: 'color',
+                label: 'Add Color',
+                type: 'color',
+                def: '#4a11ffff'
+              },
+              {
+                name: 'stop',
+                label: 'Stop',
+                type: 'range',
+                min: 0,
+                max: 100,
+                unit: '%',
+                def: 0
+              }
+            ]
+          }
+        ];
+        return schema;
+      },
+      getBrowserData(req) {
+        return {
+          schema: self.exposeSchema()
+        };
+      },
       addColorGradientFieldType() {
         self.apos.schema.addFieldType({
           name: 'colorGradient',
@@ -14,41 +57,7 @@ module.exports = {
       },
       async convertInput(req, field, data, object) {
         data = data[field.name];
-        const schema = [
-          {
-            name: 'angle',
-            label: 'Angle',
-            type: 'range',
-            min: 0,
-            max: 360,
-            unit: 'deg',
-            def: 90
-          },
-          {
-            name: 'colors',
-            label: 'Colors',
-            type: 'array',
-            min: 2,
-            inline: true,
-            fields: {
-              add: {
-                color: {
-                  label: 'Add Color',
-                  type: 'color',
-                  def: '#4a11ffff'
-                },
-                stop: {
-                  label: 'Stop',
-                  type: 'range',
-                  min: 0,
-                  max: 100,
-                  unit: '%',
-                  def: 0
-                }
-              }
-            }
-          }
-        ];
+        const schema = self.exposeSchema();
         const errors = [];
         const result = {
           _id:
@@ -69,7 +78,6 @@ module.exports = {
           }
         }
         result.metaType = 'gradientItem';
-        result.scopedObjectName = field.scopedObjectName;
         object[field.name] = result;
         if (errors.length) {
           throw errors;
